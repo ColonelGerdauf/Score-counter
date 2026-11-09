@@ -1,643 +1,438 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Beyblade Battle Tracker</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts & FontAwesome -->
-    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@600;700&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Beyblade Battle Tracker</title>
+  
+  <!-- PWA Manifest & iOS Support -->
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#03c6fc">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Beyblade Tracker">
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1046/1046857.png">
 
-    <style>
-        * {
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: manipulation;
-        }
+  <!-- Tailwind CSS & Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-        body {
-            font-family: 'Montserrat', sans-serif;
-            background-color: #0b0f19;
-            color: #ffffff;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            width: 100vw;
-            height: 100vh;
-        }
+  <style>
+    /* Forced Landscape Logic for Portrait Orientation */
+    @media screen and (orientation: portrait) {
+      body {
+        transform: rotate(-90deg);
+        transform-origin: left top;
+        width: 100vh;
+        height: 100vw;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        overflow: hidden;
+      }
+    }
+    @media screen and (orientation: landscape) {
+      body {
+        width: 100vw;
+        height: 100vh;
+      }
+    }
+    
+    /* Touch optimization */
+    button, input {
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-        /* 
-         * FORCED LANDSCAPE ROTATION 
-         * Rotates container 90 degrees when viewport height > width (Portrait mode on phones)
-         */
-        #app-viewport {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+    /* Safe Area Padding for mobile gesture bars & cutouts */
+    .safe-padding {
+      padding-left: max(1.25rem, env(safe-area-inset-left));
+      padding-right: max(1.25rem, env(safe-area-inset-right));
+      padding-top: max(0.5rem, env(safe-area-inset-top));
+      padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+    }
 
-        @media (max-aspect-ratio: 1/1) {
-            #app-container {
-                width: 100vh !important;
-                height: 100vw !important;
-                transform: rotate(90deg);
-                transform-origin: center center;
-                position: absolute;
-            }
-        }
-
-        @media (min-aspect-ratio: 1/1) {
-            #app-container {
-                width: 100vw !important;
-                height: 100vh !important;
-                transform: none;
-                position: absolute;
-            }
-        }
-
-        .font-teko {
-            font-family: 'Teko', sans-serif;
-        }
-
-        /* Custom Split Backgrounds */
-        .bg-blader1 {
-            background-color: #03c6fc;
-        }
-
-        .bg-blader2 {
-            background-color: #42ff94;
-        }
-
-        /* Text Effects */
-        .text-glow {
-            text-shadow: 0 0 16px rgba(0, 0, 0, 0.4), 0 4px 10px rgba(0, 0, 0, 0.6);
-        }
-
-        /* Animated Beyblade Spin Graphic */
-        .bey-spinner {
-            animation: spin 3s linear infinite;
-        }
-
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .btn-action {
-            transition: all 0.1s ease;
-            box-shadow: 0 4px 0px rgba(0,0,0,0.3);
-        }
-
-        .btn-action:active {
-            transform: translateY(3px);
-            box-shadow: 0 1px 0px rgba(0,0,0,0.3);
-        }
-
-        /* Hide standard spin buttons on number inputs */
-        input[type=number]::-webkit-inner-spin-button, 
-        input[type=number]::-webkit-outer-spin-button { 
-            -webkit-appearance: none;
-            margin: 0; 
-        }
-        input[type=number] {
-            -moz-appearance: textfield;
-        }
-
-        /* Confetti Canvas */
-        #confetti-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 60;
-        }
-    </style>
+    /* Animated background glows */
+    .glow-cyan {
+      box-shadow: 0 0 25px rgba(3, 198, 252, 0.6);
+    }
+    .glow-green {
+      box-shadow: 0 0 25px rgba(66, 255, 148, 0.6);
+    }
+  </style>
 </head>
-<body>
+<body class="bg-slate-950 text-white font-sans overflow-hidden select-none">
 
-    <div id="app-viewport">
-        <div id="app-container" class="relative overflow-hidden bg-slate-950 flex flex-col justify-between">
-            
-            <canvas id="confetti-canvas"></canvas>
+  <!-- Confetti Canvas overlay -->
+  <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-50 w-full h-full"></canvas>
 
-            <!-- ================= SETUP SCREEN ================= -->
-            <div id="setup-screen" class="w-full h-full flex flex-col justify-between p-5 bg-gradient-to-br from-slate-900 via-slate-950 to-black relative z-10">
-                <!-- Header -->
-                <div class="flex items-center justify-between border-b-2 border-cyan-500/30 pb-2">
-                    <div class="flex items-center gap-3">
-                        <i class="fa-solid fa-compact-disc text-cyan-400 text-3xl bey-spinner"></i>
-                        <h1 class="text-3xl font-extrabold tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-emerald-400 font-teko uppercase">
-                            BEYBLADE BATTLE TRACKER
-                        </h1>
-                    </div>
-                    <span class="text-xs font-semibold px-3 py-1 bg-cyan-950 text-cyan-300 border border-cyan-500/40 rounded-full uppercase tracking-widest">
-                        Match Setup
-                    </span>
-                </div>
+  <!-- 1. SETUP SCREEN -->
+  <div id="setup-screen" class="w-full h-full flex flex-col justify-center items-center safe-padding bg-slate-900 transition-opacity duration-300">
+    <div class="max-w-xl w-full bg-slate-800/80 backdrop-blur border border-slate-700 rounded-2xl p-6 shadow-2xl flex flex-col gap-5">
+      <div class="text-center">
+        <h1 class="text-3xl font-black italic tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-[#03c6fc] to-[#42ff94]">
+          BEYBLADE COUNTER
+        </h1>
+        <p class="text-xs text-slate-400 font-semibold tracking-widest mt-1">MOBILE MATCH TRACKER</p>
+      </div>
 
-                <!-- Main Form Area -->
-                <div class="grid grid-cols-12 gap-4 my-auto items-center">
-                    
-                    <!-- Blader 1 Settings -->
-                    <div class="col-span-5 bg-cyan-950/30 border-2 border-[#03c6fc]/50 rounded-2xl p-3 flex flex-col gap-2">
-                        <div class="flex items-center gap-2 text-[#03c6fc] font-bold text-lg">
-                            <i class="fa-solid fa-user-ninja"></i>
-                            <span>BLADER 1 (LEFT)</span>
-                        </div>
-                        <input type="text" id="blader1-name-input" value="Blader 1" 
-                            class="w-full bg-slate-900 border-2 border-[#03c6fc] text-white font-bold text-xl px-3 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#03c6fc]" 
-                            placeholder="Enter Name">
-                    </div>
-
-                    <!-- Target Points Selector (Center) -->
-                    <div class="col-span-2 flex flex-col items-center justify-center bg-slate-900/90 border-2 border-slate-700 rounded-2xl p-2">
-                        <label class="text-[11px] text-slate-400 font-bold uppercase tracking-wider mb-1 text-center">Target Points</label>
-                        <div class="flex items-center justify-center gap-2 w-full">
-                            <button type="button" id="pts-decrement" class="w-14 h-14 bg-slate-800 hover:bg-slate-700 text-cyan-400 rounded-xl flex items-center justify-center text-2xl font-black border-2 border-slate-600 active:scale-95 shadow-md">
-                                <i class="fa-solid fa-minus"></i>
-                            </button>
-                            <input type="number" id="max-points-input" value="4" min="1" max="99" 
-                                class="w-16 h-14 bg-slate-950 border-2 border-cyan-500 text-center text-yellow-400 font-extrabold text-3xl rounded-xl focus:outline-none">
-                            <button type="button" id="pts-increment" class="w-14 h-14 bg-slate-800 hover:bg-slate-700 text-cyan-400 rounded-xl flex items-center justify-center text-2xl font-black border-2 border-slate-600 active:scale-95 shadow-md">
-                                <i class="fa-solid fa-plus"></i>
-                            </button>
-                        </div>
-                        <span class="text-[10px] text-slate-400 mt-1 font-semibold">Default: 4 PTS</span>
-                    </div>
-
-                    <!-- Blader 2 Settings -->
-                    <div class="col-span-5 bg-emerald-950/30 border-2 border-[#42ff94]/50 rounded-2xl p-3 flex flex-col gap-2">
-                        <div class="flex items-center gap-2 text-[#42ff94] font-bold text-lg">
-                            <i class="fa-solid fa-user-ninja"></i>
-                            <span>BLADER 2 (RIGHT)</span>
-                        </div>
-                        <input type="text" id="blader2-name-input" value="Blader 2" 
-                            class="w-full bg-slate-900 border-2 border-[#42ff94] text-white font-bold text-xl px-3 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#42ff94]" 
-                            placeholder="Enter Name">
-                    </div>
-                </div>
-
-                <!-- Start Battle Button -->
-                <button type="button" id="start-btn" class="w-full py-4 bg-gradient-to-r from-cyan-500 via-teal-400 to-emerald-400 hover:brightness-110 text-slate-950 font-black text-3xl font-teko uppercase tracking-widest rounded-xl shadow-lg shadow-cyan-500/20 active:scale-[0.99] transition-all flex items-center justify-center gap-3">
-                    <i class="fa-solid fa-bolt text-2xl"></i>
-                    START BATTLE!
-                    <i class="fa-solid fa-bolt text-2xl"></i>
-                </button>
-            </div>
-
-
-            <!-- ================= SCORE COUNTER SCREEN ================= -->
-            <div id="counter-screen" class="w-full h-full hidden flex-row relative z-10">
-                
-                <!-- Center Divider Line / VS Badge & Refresh Button -->
-                <div class="absolute inset-y-0 left-1/2 -translate-x-1/2 z-40 flex flex-col items-center justify-center pointer-events-none">
-                    <div class="w-1 h-full bg-black/30 backdrop-blur-sm"></div>
-                    <div class="absolute flex flex-col items-center gap-3 pointer-events-auto">
-                        <div class="bg-slate-950 text-white font-black text-2xl font-teko px-3 py-0.5 rounded-full border-2 border-yellow-400 shadow-2xl flex items-center justify-center tracking-widest">
-                            VS
-                        </div>
-                        <!-- Center Refresh / Reset Button -->
-                        <button type="button" id="center-refresh-btn" title="Reset Match Scores" 
-                            class="w-12 h-12 bg-slate-950 hover:bg-slate-900 text-yellow-400 hover:text-yellow-300 border-2 border-yellow-400 rounded-full flex items-center justify-center shadow-xl active:scale-90 transition-transform">
-                            <i class="fa-solid fa-rotate-right text-xl"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- BLADER 1 SIDE (#03c6fc) -->
-                <div class="w-1/2 h-full bg-blader1 text-slate-950 flex flex-col justify-between p-3 relative border-r-2 border-black/20">
-                    
-                    <!-- TOP CONTROL BAR (BLADER 1) -->
-                    <div class="flex items-center justify-between gap-1.5 bg-black/20 p-1.5 rounded-xl backdrop-blur-md z-30">
-                        <div class="flex gap-1.5 w-3/4">
-                            <button type="button" id="b1-add1" class="btn-action flex-1 bg-slate-950 text-[#03c6fc] border border-cyan-300/40 font-extrabold text-xl py-1.5 rounded-lg active:bg-slate-900 flex items-center justify-center">
-                                +1
-                            </button>
-                            <button type="button" id="b1-add2" class="btn-action flex-1 bg-slate-950 text-[#03c6fc] border border-cyan-300/40 font-extrabold text-xl py-1.5 rounded-lg active:bg-slate-900 flex items-center justify-center">
-                                +2
-                            </button>
-                            <button type="button" id="b1-add3" class="btn-action flex-1 bg-slate-950 text-[#03c6fc] border border-cyan-300/40 font-extrabold text-xl py-1.5 rounded-lg active:bg-slate-900 flex items-center justify-center">
-                                +3
-                            </button>
-                        </div>
-                        <button type="button" id="b1-undo" title="Undo" class="btn-action w-1/4 bg-red-600 hover:bg-red-700 text-white font-bold text-lg py-1.5 rounded-lg flex items-center justify-center">
-                            <i class="fa-solid fa-rotate-left"></i>
-                        </button>
-                    </div>
-
-                    <!-- BLADER 1 SCORE DISPLAY -->
-                    <div class="flex flex-col items-center justify-center my-auto">
-                        <span id="display-b1-name" class="text-2xl font-black uppercase text-slate-950 tracking-wider drop-shadow-sm truncate max-w-full px-2">
-                            Blader 1
-                        </span>
-                        <div id="display-b1-score" class="font-teko text-9xl font-extrabold leading-none text-slate-950 text-glow my-0">
-                            0
-                        </div>
-                    </div>
-
-                    <!-- BOTTOM STATS BAR -->
-                    <div class="flex justify-between items-center text-slate-900/80 font-bold text-xs uppercase px-1">
-                        <span>Target: <span class="target-pts-val text-slate-950 font-extrabold text-sm">4</span> PTS</span>
-                        <button type="button" id="setup-btn-1" class="text-xs text-slate-950/80 hover:text-slate-950 font-bold underline flex items-center gap-1">
-                            <i class="fa-solid fa-gear"></i> Setup
-                        </button>
-                    </div>
-                </div>
-
-                <!-- BLADER 2 SIDE (#42ff94) -->
-                <div class="w-1/2 h-full bg-blader2 text-slate-950 flex flex-col justify-between p-3 relative border-l-2 border-black/20">
-                    
-                    <!-- TOP CONTROL BAR (BLADER 2) -->
-                    <div class="flex items-center justify-between gap-1.5 bg-black/20 p-1.5 rounded-xl backdrop-blur-md z-30">
-                        <div class="flex gap-1.5 w-3/4">
-                            <button type="button" id="b2-add1" class="btn-action flex-1 bg-slate-950 text-[#42ff94] border border-emerald-300/40 font-extrabold text-xl py-1.5 rounded-lg active:bg-slate-900 flex items-center justify-center">
-                                +1
-                            </button>
-                            <button type="button" id="b2-add2" class="btn-action flex-1 bg-slate-950 text-[#42ff94] border border-emerald-300/40 font-extrabold text-xl py-1.5 rounded-lg active:bg-slate-900 flex items-center justify-center">
-                                +2
-                            </button>
-                            <button type="button" id="b2-add3" class="btn-action flex-1 bg-slate-950 text-[#42ff94] border border-emerald-300/40 font-extrabold text-xl py-1.5 rounded-lg active:bg-slate-900 flex items-center justify-center">
-                                +3
-                            </button>
-                        </div>
-                        <button type="button" id="b2-undo" title="Undo" class="btn-action w-1/4 bg-red-600 hover:bg-red-700 text-white font-bold text-lg py-1.5 rounded-lg flex items-center justify-center">
-                            <i class="fa-solid fa-rotate-left"></i>
-                        </button>
-                    </div>
-
-                    <!-- BLADER 2 SCORE DISPLAY -->
-                    <div class="flex flex-col items-center justify-center my-auto">
-                        <span id="display-b2-name" class="text-2xl font-black uppercase text-slate-950 tracking-wider drop-shadow-sm truncate max-w-full px-2">
-                            Blader 2
-                        </span>
-                        <div id="display-b2-score" class="font-teko text-9xl font-extrabold leading-none text-slate-950 text-glow my-0">
-                            0
-                        </div>
-                    </div>
-
-                    <!-- BOTTOM STATS BAR -->
-                    <div class="flex justify-between items-center text-slate-900/80 font-bold text-xs uppercase px-1">
-                        <span>Target: <span class="target-pts-val text-slate-950 font-extrabold text-sm">4</span> PTS</span>
-                        <button type="button" id="setup-btn-2" class="text-xs text-slate-950/80 hover:text-slate-950 font-bold underline flex items-center gap-1">
-                            <i class="fa-solid fa-gear"></i> Setup
-                        </button>
-                    </div>
-                </div>
-
-            </div>
-
-
-            <!-- ================= CONGRATULATIONS SCREEN ================= -->
-            <div id="winner-screen" class="w-full h-full hidden flex-col items-center justify-between p-6 transition-colors duration-500 relative z-50">
-                <div class="flex items-center gap-2 text-yellow-300 font-teko text-2xl tracking-widest mt-2 drop-shadow-md">
-                    <i class="fa-solid fa-trophy text-yellow-300"></i>
-                    BEYBLADE CHAMPION
-                    <i class="fa-solid fa-trophy text-yellow-300"></i>
-                </div>
-
-                <div class="flex flex-col items-center justify-center my-auto text-center">
-                    <h2 class="text-2xl font-bold text-slate-900/80 uppercase tracking-widest mb-1">CONGRATULATIONS</h2>
-                    <h1 id="winner-name-display" class="text-6xl font-black text-slate-950 font-teko uppercase tracking-wider mb-2 drop-shadow-md">
-                        BLADER 1
-                    </h1>
-                    <p class="text-xl font-black text-slate-900/90 tracking-wide uppercase">VICTORY IS YOURS!</p>
-                </div>
-
-                <div class="flex gap-4 w-full max-w-md mb-2">
-                    <button type="button" id="rematch-btn" class="flex-1 py-3 bg-slate-950 hover:bg-slate-900 text-yellow-400 font-extrabold text-2xl font-teko uppercase rounded-xl shadow-xl active:scale-95 transition-all border border-yellow-400/30">
-                        <i class="fa-solid fa-rotate-right mr-1"></i> Rematch
-                    </button>
-                    <button type="button" id="edit-setup-btn" class="flex-1 py-3 bg-slate-950/80 hover:bg-slate-950 text-white font-extrabold text-2xl font-teko uppercase rounded-xl shadow-xl active:scale-95 transition-all border border-white/20">
-                        <i class="fa-solid fa-gear mr-1"></i> Match Setup
-                    </button>
-                </div>
-            </div>
-
+      <!-- Max Points Stepper -->
+      <div class="flex flex-col items-center gap-2 bg-slate-900/60 p-3 rounded-xl border border-slate-700/50">
+        <label class="text-xs font-bold uppercase tracking-wider text-slate-300">Target Score to Win</label>
+        <div class="flex items-center gap-4">
+          <button id="btn-minus" type="button" class="w-14 h-14 bg-slate-800 hover:bg-slate-700 active:scale-95 text-2xl font-bold rounded-xl border border-slate-600 flex items-center justify-center text-slate-200 transition">
+            <i class="fa-solid fa-minus"></i>
+          </button>
+          <input id="max-points-input" type="number" value="4" min="1" max="99" class="w-20 h-14 bg-slate-950 text-center font-black text-3xl text-yellow-400 rounded-xl border border-slate-700 focus:outline-none focus:border-cyan-400">
+          <button id="btn-plus" type="button" class="w-14 h-14 bg-slate-800 hover:bg-slate-700 active:scale-95 text-2xl font-bold rounded-xl border border-slate-600 flex items-center justify-center text-slate-200 transition">
+            <i class="fa-solid fa-plus"></i>
+          </button>
         </div>
+      </div>
+
+      <!-- Blader Names Setup -->
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-bold text-[#03c6fc] uppercase tracking-wider mb-1">Blader 1</label>
+          <input id="blader1-input" type="text" value="Blader 1" class="w-full h-12 bg-slate-950 px-3 font-bold text-slate-100 rounded-lg border border-[#03c6fc]/40 focus:outline-none focus:border-[#03c6fc]">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-[#42ff94] uppercase tracking-wider mb-1">Blader 2</label>
+          <input id="blader2-input" type="text" value="Blader 2" class="w-full h-12 bg-slate-950 px-3 font-bold text-slate-100 rounded-lg border border-[#42ff94]/40 focus:outline-none focus:border-[#42ff94]">
+        </div>
+      </div>
+
+      <!-- Start Button -->
+      <button id="start-btn" type="button" class="w-full py-3.5 bg-gradient-to-r from-[#03c6fc] to-[#42ff94] text-slate-950 font-black text-lg tracking-wider rounded-xl shadow-lg active:scale-98 transition transform">
+        START BATTLE
+      </button>
+    </div>
+  </div>
+
+  <!-- 2. SCORE COUNTER SCREEN -->
+  <div id="counter-screen" class="hidden w-full h-full flex safe-padding relative">
+    
+    <!-- Left Side: Blader 1 (#03c6fc) -->
+    <div class="w-1/2 h-full bg-[#03c6fc] text-slate-950 flex flex-col justify-between p-4 relative border-r-2 border-slate-900/30">
+      
+      <!-- Top Actions (Blader 1) -->
+      <div class="flex items-center gap-2 z-10">
+        <button id="b1-add1" class="px-4 py-2 bg-slate-950/20 hover:bg-slate-950/30 active:scale-95 text-slate-950 border border-slate-950/20 rounded-xl font-black text-lg shadow-md transition">
+          +1
+        </button>
+        <button id="b1-add2" class="px-4 py-2 bg-slate-950/20 hover:bg-slate-950/30 active:scale-95 text-slate-950 border border-slate-950/20 rounded-xl font-black text-lg shadow-md transition">
+          +2
+        </button>
+        <button id="b1-add3" class="px-4 py-2 bg-slate-950/20 hover:bg-slate-950/30 active:scale-95 text-slate-950 border border-slate-950/20 rounded-xl font-black text-lg shadow-md transition">
+          +3
+        </button>
+        <button id="b1-undo" class="ml-auto px-4 py-2 bg-slate-950/20 hover:bg-slate-950/30 active:scale-95 text-slate-950 border border-slate-950/20 rounded-xl font-black text-lg shadow-md transition" title="Undo Side 1">
+          <i class="fa-solid fa-rotate-left"></i>
+        </button>
+      </div>
+
+      <!-- Score & Name Display (Blader 1) -->
+      <div class="flex flex-col items-center justify-center my-auto">
+        <h2 id="b1-display-name" class="text-2xl font-black tracking-wide uppercase truncate max-w-[90%] text-slate-950/80 mb-2">
+          BLADER 1
+        </h2>
+        <span id="b1-score" class="text-8xl font-black tracking-tight drop-shadow-md">
+          0
+        </span>
+      </div>
+
+      <div class="text-xs font-bold text-slate-950/60 uppercase tracking-widest text-center">FIRST TO <span class="max-target-display">4</span></div>
     </div>
 
-    <!-- Application Script -->
-    <script>
-        // State Management
-        let blader1Name = "Blader 1";
-        let blader2Name = "Blader 2";
-        let maxPoints = 4;
-        let score1 = 0;
-        let score2 = 0;
+    <!-- Center Divider & Refresh Control -->
+    <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center gap-3 pointer-events-none">
+      <div class="w-12 h-12 bg-slate-950 rounded-full border-4 border-slate-800 flex items-center justify-center font-black text-white text-xs shadow-xl tracking-wider">
+        VS
+      </div>
+      <button id="mid-refresh-btn" class="pointer-events-auto w-11 h-11 bg-slate-900/90 hover:bg-slate-950 text-white active:rotate-180 rounded-full border-2 border-slate-700 flex items-center justify-center shadow-lg transition duration-300">
+        <i class="fa-solid fa-rotate-right text-base"></i>
+      </button>
+    </div>
+
+    <!-- Right Side: Blader 2 (#42ff94) -->
+    <div class="w-1/2 h-full bg-[#42ff94] text-slate-950 flex flex-col justify-between p-4 relative border-l-2 border-slate-900/30">
+      
+      <!-- Top Actions (Blader 2) -->
+      <div class="flex items-center gap-2 z-10 flex-row-reverse">
+        <button id="b2-add1" class="px-4 py-2 bg-slate-950/20 hover:bg-slate-950/30 active:scale-95 text-slate-950 border border-slate-950/20 rounded-xl font-black text-lg shadow-md transition">
+          +1
+        </button>
+        <button id="b2-add2" class="px-4 py-2 bg-slate-950/20 hover:bg-slate-950/30 active:scale-95 text-slate-950 border border-slate-950/20 rounded-xl font-black text-lg shadow-md transition">
+          +2
+        </button>
+        <button id="b2-add3" class="px-4 py-2 bg-slate-950/20 hover:bg-slate-950/30 active:scale-95 text-slate-950 border border-slate-950/20 rounded-xl font-black text-lg shadow-md transition">
+          +3
+        </button>
+        <button id="b2-undo" class="mr-auto px-4 py-2 bg-slate-950/20 hover:bg-slate-950/30 active:scale-95 text-slate-950 border border-slate-950/20 rounded-xl font-black text-lg shadow-md transition" title="Undo Side 2">
+          <i class="fa-solid fa-rotate-left"></i>
+        </button>
+      </div>
+
+      <!-- Score & Name Display (Blader 2) -->
+      <div class="flex flex-col items-center justify-center my-auto">
+        <h2 id="b2-display-name" class="text-2xl font-black tracking-wide uppercase truncate max-w-[90%] text-slate-950/80 mb-2">
+          BLADER 2
+        </h2>
+        <span id="b2-score" class="text-8xl font-black tracking-tight drop-shadow-md">
+          0
+        </span>
+      </div>
+
+      <div class="text-xs font-bold text-slate-950/60 uppercase tracking-widest text-center">FIRST TO <span class="max-target-display">4</span></div>
+    </div>
+  </div>
+
+  <!-- 3. VICTORY CONGRATULATIONS SCREEN -->
+  <div id="victory-screen" class="hidden w-full h-full flex flex-col items-center justify-center safe-padding relative text-center">
+    <div class="z-10 max-w-lg w-full bg-slate-950/60 backdrop-blur-md p-8 rounded-3xl border border-white/20 shadow-2xl flex flex-col items-center gap-4">
+      <div class="w-20 h-20 bg-yellow-400 text-slate-950 rounded-full flex items-center justify-center text-4xl shadow-lg mb-2">
+        <i class="fa-solid fa-trophy"></i>
+      </div>
+      <h2 class="text-sm font-bold uppercase tracking-widest text-slate-900/80">VICTORY UNLOCKED</h2>
+      <h1 id="winner-name-display" class="text-4xl font-black text-slate-950 tracking-wide uppercase drop-shadow-sm">
+        BLADER 1 WINS!
+      </h1>
+      <p id="winner-score-summary" class="text-lg font-bold text-slate-950/90">
+        Final Score: 4 - 2
+      </p>
+
+      <div class="flex gap-4 w-full mt-4">
+        <button id="rematch-btn" class="flex-1 py-3.5 bg-slate-950 hover:bg-slate-900 text-white font-bold rounded-xl shadow-lg active:scale-95 transition">
+          REMATCH
+        </button>
+        <button id="new-setup-btn" class="flex-1 py-3.5 bg-white/30 hover:bg-white/40 text-slate-950 border border-slate-950/30 font-bold rounded-xl shadow-md active:scale-95 transition">
+          SETUP
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // Audio synth
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      function playTone(freq, type, duration) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      }
+
+      // App state
+      let maxPoints = 4;
+      let score1 = 0;
+      let score2 = 0;
+      let history1 = [];
+      let history2 = [];
+      let name1 = "Blader 1";
+      let name2 = "Blader 2";
+      let confettiActive = false;
+      let confettiAnimationId = null;
+
+      // DOM Elements
+      const setupScreen = document.getElementById('setup-screen');
+      const counterScreen = document.getElementById('counter-screen');
+      const victoryScreen = document.getElementById('victory-screen');
+
+      const maxPointsInput = document.getElementById('max-points-input');
+      const btnMinus = document.getElementById('btn-minus');
+      const btnPlus = document.getElementById('btn-plus');
+      const blader1Input = document.getElementById('blader1-input');
+      const blader2Input = document.getElementById('blader2-input');
+      const startBtn = document.getElementById('start-btn');
+
+      const b1DisplayName = document.getElementById('b1-display-name');
+      const b2DisplayName = document.getElementById('b2-display-name');
+      const b1ScoreEl = document.getElementById('b1-score');
+      const b2ScoreEl = document.getElementById('b2-score');
+      const maxTargetDisplays = document.querySelectorAll('.max-target-display');
+      const midRefreshBtn = document.getElementById('mid-refresh-btn');
+
+      const winnerNameDisplay = document.getElementById('winner-name-display');
+      const winnerScoreSummary = document.getElementById('winner-score-summary');
+      const rematchBtn = document.getElementById('rematch-btn');
+      const newSetupBtn = document.getElementById('new-setup-btn');
+
+      // Setup Stepper Listeners
+      btnMinus.addEventListener('click', () => {
+        let val = parseInt(maxPointsInput.value) || 1;
+        if (val > 1) maxPointsInput.value = val - 1;
+      });
+
+      btnPlus.addEventListener('click', () => {
+        let val = parseInt(maxPointsInput.value) || 1;
+        if (val < 99) maxPointsInput.value = val + 1;
+      });
+
+      // Start Game Event
+      startBtn.addEventListener('click', () => {
+        maxPoints = parseInt(maxPointsInput.value) || 4;
+        name1 = blader1Input.value.trim() || "Blader 1";
+        name2 = blader2Input.value.trim() || "Blader 2";
+
+        b1DisplayName.textContent = name1;
+        b2DisplayName.textContent = name2;
+        maxTargetDisplays.forEach(el => el.textContent = maxPoints);
+
+        resetScores();
+
+        setupScreen.classList.add('hidden');
+        counterScreen.classList.remove('hidden');
+        victoryScreen.classList.add('hidden');
+      });
+
+      // Point Buttons Event Binding
+      document.getElementById('b1-add1').addEventListener('click', () => addPoints(1, 1));
+      document.getElementById('b1-add2').addEventListener('click', () => addPoints(1, 2));
+      document.getElementById('b1-add3').addEventListener('click', () => addPoints(1, 3));
+      document.getElementById('b1-undo').addEventListener('click', () => undoSide(1));
+
+      document.getElementById('b2-add1').addEventListener('click', () => addPoints(2, 1));
+      document.getElementById('b2-add2').addEventListener('click', () => addPoints(2, 2));
+      document.getElementById('b2-add3').addEventListener('click', () => addPoints(2, 3));
+      document.getElementById('b2-undo').addEventListener('click', () => undoSide(2));
+
+      midRefreshBtn.addEventListener('click', resetScores);
+
+      function addPoints(blader, pts) {
+        if (blader === 1) {
+          score1 += pts;
+          history1.push(pts);
+          b1ScoreEl.textContent = score1;
+          playTone(440 + pts * 100, 'sine', 0.15);
+        } else {
+          score2 += pts;
+          history2.push(pts);
+          b2ScoreEl.textContent = score2;
+          playTone(520 + pts * 100, 'sine', 0.15);
+        }
+
+        checkVictory();
+      }
+
+      function undoSide(blader) {
+        if (blader === 1 && history1.length > 0) {
+          const popped = history1.pop();
+          score1 = Math.max(0, score1 - popped);
+          b1ScoreEl.textContent = score1;
+          playTone(300, 'triangle', 0.1);
+        } else if (blader === 2 && history2.length > 0) {
+          const popped = history2.pop();
+          score2 = Math.max(0, score2 - popped);
+          b2ScoreEl.textContent = score2;
+          playTone(300, 'triangle', 0.1);
+        }
+      }
+
+      function resetScores() {
+        score1 = 0;
+        score2 = 0;
+        history1 = [];
+        history2 = [];
+        b1ScoreEl.textContent = 0;
+        b2ScoreEl.textContent = 0;
+      }
+
+      function checkVictory() {
+        if (score1 >= maxPoints || score2 >= maxPoints) {
+          const isB1 = score1 >= maxPoints;
+          const winnerName = isB1 ? name1 : name2;
+          const winnerBgColor = isB1 ? 'bg-[#03c6fc]' : 'bg-[#42ff94]';
+
+          winnerNameDisplay.textContent = `${winnerName} WINS!`;
+          winnerScoreSummary.textContent = `Final Score: ${score1} - ${score2}`;
+
+          victoryScreen.className = `w-full h-full flex flex-col items-center justify-center safe-padding relative text-center ${winnerBgColor} transition-colors duration-500`;
+
+          counterScreen.classList.add('hidden');
+          victoryScreen.classList.remove('hidden');
+
+          playTone(587.33, 'triangle', 0.2);
+          setTimeout(() => playTone(880, 'sine', 0.4), 200);
+
+          triggerConfetti();
+        }
+      }
+
+      // Rematch & Setup Buttons
+      rematchBtn.addEventListener('click', () => {
+        stopAndClearConfetti();
+        resetScores();
+        victoryScreen.classList.add('hidden');
+        counterScreen.classList.remove('hidden');
+      });
+
+      newSetupBtn.addEventListener('click', () => {
+        stopAndClearConfetti();
+        victoryScreen.classList.add('hidden');
+        counterScreen.classList.add('hidden');
+        setupScreen.classList.remove('hidden');
+      });
+
+      // Clear confetti on click
+      window.addEventListener('pointerdown', () => {
+        if (confettiActive) {
+          stopAndClearConfetti();
+        }
+      });
+
+      function triggerConfetti() {
+        stopAndClearConfetti();
+        confettiActive = true;
         
-        // Independent Per-Side History Stacks
-        let history1 = [];
-        let history2 = [];
+        const count = 200;
+        const defaults = { origin: { y: 0.7 } };
 
-        // Web Audio Synthesizer for SFX
-        let audioCtx = null;
-
-        function getAudioContext() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-            return audioCtx;
+        function fire(particleRatio, opts) {
+          confetti(Object.assign({}, defaults, opts, {
+            particleCount: Math.floor(count * particleRatio)
+          }));
         }
 
-        function playSound(type) {
-            try {
-                const ctx = getAudioContext();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.connect(gain);
-                gain.connect(ctx.destination);
+        fire(0.25, { spread: 26, startVelocity: 55 });
+        fire(0.2, { spread: 60 });
+        fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+        fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+        fire(0.1, { spread: 120, startVelocity: 45 });
+      }
 
-                const now = ctx.currentTime;
-
-                if (type === 'score') {
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(440, now);
-                    osc.frequency.exponentialRampToValueAtTime(880, now + 0.15);
-                    gain.gain.setValueAtTime(0.3, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
-                    osc.start(now);
-                    osc.stop(now + 0.15);
-                } else if (type === 'undo') {
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(500, now);
-                    osc.frequency.exponentialRampToValueAtTime(250, now + 0.15);
-                    gain.gain.setValueAtTime(0.3, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
-                    osc.start(now);
-                    osc.stop(now + 0.15);
-                } else if (type === 'win') {
-                    const notes = [523.25, 659.25, 783.99, 1046.50];
-                    notes.forEach((freq, idx) => {
-                        const noteOsc = ctx.createOscillator();
-                        const noteGain = ctx.createGain();
-                        noteOsc.connect(noteGain);
-                        noteGain.connect(ctx.destination);
-                        
-                        noteOsc.type = 'triangle';
-                        noteOsc.frequency.setValueAtTime(freq, now + idx * 0.1);
-                        noteGain.gain.setValueAtTime(0.3, now + idx * 0.1);
-                        noteGain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.1 + 0.3);
-                        
-                        noteOsc.start(now + idx * 0.1);
-                        noteOsc.stop(now + idx * 0.1 + 0.3);
-                    });
-                }
-            } catch (e) {
-                // Audio fallback if muted or blocked
-            }
+      function stopAndClearConfetti() {
+        confettiActive = false;
+        if (window.confetti && typeof window.confetti.reset === 'function') {
+          window.confetti.reset();
         }
+        const canvas = document.getElementById('confetti-canvas');
+        if (canvas) {
+          const ctx = canvas.getContext('2d');
+          if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+    });
 
-        // Initialize DOM Event Handlers
-        document.addEventListener('DOMContentLoaded', () => {
-            const setupScreen = document.getElementById('setup-screen');
-            const counterScreen = document.getElementById('counter-screen');
-            const winnerScreen = document.getElementById('winner-screen');
-            
-            const maxPointsInput = document.getElementById('max-points-input');
-            const ptsIncBtn = document.getElementById('pts-increment');
-            const ptsDecBtn = document.getElementById('pts-decrement');
-            
-            const b1Input = document.getElementById('blader1-name-input');
-            const b2Input = document.getElementById('blader2-name-input');
-            
-            const startBtn = document.getElementById('start-btn');
-            const centerRefreshBtn = document.getElementById('center-refresh-btn');
-            
-            const setupBtn1 = document.getElementById('setup-btn-1');
-            const setupBtn2 = document.getElementById('setup-btn-2');
-            
-            const rematchBtn = document.getElementById('rematch-btn');
-            const editSetupBtn = document.getElementById('edit-setup-btn');
-
-            // Stepper controls
-            ptsIncBtn.addEventListener('click', () => {
-                let current = parseInt(maxPointsInput.value) || 4;
-                maxPointsInput.value = Math.min(99, current + 1);
-            });
-
-            ptsDecBtn.addEventListener('click', () => {
-                let current = parseInt(maxPointsInput.value) || 4;
-                maxPointsInput.value = Math.max(1, current - 1);
-            });
-
-            // Start Battle Click Handler
-            startBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                blader1Name = b1Input.value.trim() || "Blader 1";
-                blader2Name = b2Input.value.trim() || "Blader 2";
-                maxPoints = parseInt(maxPointsInput.value) || 4;
-                if (maxPoints < 1) maxPoints = 1;
-
-                // Update Display Text
-                document.getElementById('display-b1-name').innerText = blader1Name;
-                document.getElementById('display-b2-name').innerText = blader2Name;
-                document.querySelectorAll('.target-pts-val').forEach(el => el.innerText = maxPoints);
-                // Reset scores & history
-                score1 = 0;
-                score2 = 0;
-                history1 = [];
-                history2 = [];
-                updateScoreDisplays();
-
-                // Switch screens
-                setupScreen.classList.add('hidden');
-                winnerScreen.classList.add('hidden');
-                counterScreen.classList.remove('hidden');
-                counterScreen.classList.add('flex');
-
-                playSound('score');
-            });
-
-            // Blader 1 Action Buttons
-            document.getElementById('b1-add1').addEventListener('click', () => addScore(1, 1));
-            document.getElementById('b1-add2').addEventListener('click', () => addScore(1, 2));
-            document.getElementById('b1-add3').addEventListener('click', () => addScore(1, 3));
-            document.getElementById('b1-undo').addEventListener('click', () => undoScore(1));
-
-            // Blader 2 Action Buttons
-            document.getElementById('b2-add1').addEventListener('click', () => addScore(2, 1));
-            document.getElementById('b2-add2').addEventListener('click', () => addScore(2, 2));
-            document.getElementById('b2-add3').addEventListener('click', () => addScore(2, 3));
-            document.getElementById('b2-undo').addEventListener('click', () => undoScore(2));
-
-            // Reset / Setup Navigation Buttons
-            centerRefreshBtn.addEventListener('click', () => rematch());
-            setupBtn1.addEventListener('click', () => resetToSetup());
-            setupBtn2.addEventListener('click', () => resetToSetup());
-            
-            rematchBtn.addEventListener('click', () => rematch());
-            editSetupBtn.addEventListener('click', () => resetToSetup());
-
-            // Resize listener for confetti canvas
-            window.addEventListener('resize', resizeCanvas);
-            resizeCanvas();
+    // Service Worker Registration for PWA & Offline Support
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => {
+          console.log('SW registration failed:', err);
         });
-
-        function updateScoreDisplays() {
-            document.getElementById('display-b1-score').innerText = score1;
-            document.getElementById('display-b2-score').innerText = score2;
-        }
-
-        function addScore(bladerNum, points) {
-            if (bladerNum === 1) {
-                history1.push(points);
-                score1 += points;
-            } else {
-                history2.push(points);
-                score2 += points;
-            }
-            
-            updateScoreDisplays();
-            playSound('score');
-
-            // Check Win Condition
-            if (score1 >= maxPoints || score2 >= maxPoints) {
-                setTimeout(() => {
-                    triggerWin(score1 >= maxPoints ? blader1Name : blader2Name);
-                }, 150);
-            }
-        }
-
-        function undoScore(bladerNum) {
-            if (bladerNum === 1) {
-                if (history1.length > 0) {
-                    const lastAdded = history1.pop();
-                    score1 = Math.max(0, score1 - lastAdded);
-                    updateScoreDisplays();
-                    playSound('undo');
-                }
-            } else if (bladerNum === 2) {
-                if (history2.length > 0) {
-                    const lastAdded = history2.pop();
-                    score2 = Math.max(0, score2 - lastAdded);
-                    updateScoreDisplays();
-                    playSound('undo');
-                }
-            }
-        }
-
-        function rematch() {
-            score1 = 0;
-            score2 = 0;
-            history1 = [];
-            history2 = [];
-            updateScoreDisplays();
-
-            document.getElementById('winner-screen').classList.add('hidden');
-            document.getElementById('setup-screen').classList.add('hidden');
-            const counter = document.getElementById('counter-screen');
-            counter.classList.remove('hidden');
-            counter.classList.add('flex');
-            
-            playSound('score');
-        }
-
-        function resetToSetup() {
-            document.getElementById('winner-screen').classList.add('hidden');
-            document.getElementById('counter-screen').classList.add('hidden');
-            document.getElementById('setup-screen').classList.remove('hidden');
-        }
-
-        function triggerWin(winnerName) {
-            document.getElementById('winner-name-display').innerText = winnerName;
-            
-            const winScreen = document.getElementById('winner-screen');
-            // Apply signature dynamic color background based on winner
-            if (winnerName === blader1Name) {
-                winScreen.className = "w-full h-full flex flex-col items-center justify-between p-6 bg-gradient-to-br from-[#03c6fc] via-cyan-400 to-sky-600 text-slate-950 transition-colors duration-500 relative z-50";
-            } else {
-                winScreen.className = "w-full h-full flex flex-col items-center justify-between p-6 bg-gradient-to-br from-[#42ff94] via-emerald-400 to-teal-600 text-slate-950 transition-colors duration-500 relative z-50";
-            }
-
-            document.getElementById('counter-screen').classList.add('hidden');
-            winScreen.classList.remove('hidden');
-
-            playSound('win');
-            startConfetti();
-        }
-
-        /* Confetti Effect */
-        let canvas = document.getElementById('confetti-canvas');
-        let ctx = canvas.getContext('2d');
-        let particles = [];
-
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-
-        function startConfetti() {
-            particles = [];
-            const colors = ['#03c6fc', '#42ff94', '#facc15', '#f43f5e', '#a855f7'];
-            for (let i = 0; i < 90; i++) {
-                particles.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height - canvas.height,
-                    size: Math.random() * 8 + 4,
-                    color: colors[Math.floor(Math.random() * colors.length)],
-                    vx: (Math.random() - 0.5) * 4,
-                    vy: Math.random() * 4 + 2,
-                    rot: Math.random() * 360,
-                    vRot: (Math.random() - 0.5) * 10
-                });
-            }
-            animateConfetti();
-        }
-
-        let animationFrame;
-        function animateConfetti() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            let active = false;
-
-            particles.forEach(p => {
-                p.x += p.vx;
-                p.y += p.vy;
-                p.rot += p.vRot;
-
-                if (p.y < canvas.height) active = true;
-
-                ctx.save();
-                ctx.translate(p.x, p.y);
-                ctx.rotate((p.rot * Math.PI) / 180);
-                ctx.fillStyle = p.color;
-                ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
-                ctx.restore();
-            });
-
-            if (active && !document.getElementById('winner-screen').classList.contains('hidden')) {
-                animationFrame = requestAnimationFrame(animateConfetti);
-            }
-        }
-
-        // Function to completely stop and clear confetti canvas immediately
-        function stopAndClearConfetti() {
-            if (animationFrame) {
-                cancelAnimationFrame(animationFrame);
-                animationFrame = null;
-            }
-            particles = [];
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }
-
-        // Clear confetti on any click anywhere in the viewport
-        window.addEventListener('pointerdown', () => {
-            if (particles.length > 0) {
-                stopAndClearConfetti();
-            }
-        });
-    </script>
+      });
+    }
+  </script>
 </body>
 </html>
