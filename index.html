@@ -23,7 +23,7 @@
     /* Forced Landscape Logic for Portrait Orientation */
     @media screen and (orientation: portrait) {
       body {
-        transform: rotate(90deg);
+        transform: rotate(-90deg);
         transform-origin: left top;
         width: 100vh;
         height: 100vw;
@@ -47,20 +47,12 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* Safe Area Padding for mobile gesture bars & cutouts */
+    /* Generous Safe Area Padding for mobile gesture bars & cutouts */
     .safe-padding {
-      padding-left: max(1.25rem, env(safe-area-inset-left));
-      padding-right: max(3rem, env(safe-area-inset-right));
-      padding-top: max(0.5rem, env(safe-area-inset-top));
-      padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
-    }
-
-    /* Animated background glows */
-    .glow-cyan {
-      box-shadow: 0 0 25px rgba(3, 198, 252, 0.6);
-    }
-    .glow-green {
-      box-shadow: 0 0 25px rgba(66, 255, 148, 0.6);
+      padding-left: max(2rem, env(safe-area-inset-left));
+      padding-right: max(2rem, env(safe-area-inset-right));
+      padding-top: max(0.75rem, env(safe-area-inset-top));
+      padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
     }
   </style>
 </head>
@@ -70,43 +62,60 @@
   <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-50 w-full h-full"></canvas>
 
   <!-- 1. SETUP SCREEN -->
-  <div id="setup-screen" class="w-full h-full flex flex-col justify-center items-center safe-padding bg-slate-900 transition-opacity duration-300">
-    <div class="max-w-xl w-full bg-slate-800/80 backdrop-blur border border-slate-700 rounded-2xl p-6 shadow-2xl flex flex-col gap-5">
+  <div id="setup-screen" class="w-full h-full flex flex-col justify-center items-center safe-padding bg-slate-900 transition-opacity duration-300 overflow-y-auto">
+    <div class="max-w-xl w-full bg-slate-800/90 backdrop-blur border border-slate-700 rounded-2xl p-5 shadow-2xl flex flex-col gap-4 my-auto">
       <div class="text-center">
-        <h1 class="text-3xl font-black italic tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-[#03c6fc] to-[#42ff94]">
+        <h1 class="text-2xl font-black italic tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-[#03c6fc] to-[#42ff94]">
           BEYBLADE COUNTER
         </h1>
-        <p class="text-xs text-slate-400 font-semibold tracking-widest mt-1">MOBILE MATCH TRACKER</p>
+        <p class="text-xs text-slate-400 font-semibold tracking-widest mt-0.5">MOBILE MATCH TRACKER</p>
       </div>
 
-      <!-- Max Points Stepper -->
-      <div class="flex flex-col items-center gap-2 bg-slate-900/60 p-3 rounded-xl border border-slate-700/50">
-        <label class="text-xs font-bold uppercase tracking-wider text-slate-300">Target Score to Win</label>
-        <div class="flex items-center gap-4">
-          <button id="btn-minus" type="button" class="w-14 h-14 bg-slate-800 hover:bg-slate-700 active:scale-95 text-2xl font-bold rounded-xl border border-slate-600 flex items-center justify-center text-slate-200 transition">
-            <i class="fa-solid fa-minus"></i>
-          </button>
-          <input id="max-points-input" type="number" value="4" min="1" max="99" class="w-20 h-14 bg-slate-950 text-center font-black text-3xl text-yellow-400 rounded-xl border border-slate-700 focus:outline-none focus:border-cyan-400">
-          <button id="btn-plus" type="button" class="w-14 h-14 bg-slate-800 hover:bg-slate-700 active:scale-95 text-2xl font-bold rounded-xl border border-slate-600 flex items-center justify-center text-slate-200 transition">
-            <i class="fa-solid fa-plus"></i>
-          </button>
+      <!-- Settings Grid -->
+      <div class="grid grid-cols-2 gap-3">
+        <!-- Max Points Stepper -->
+        <div class="flex flex-col items-center gap-1 bg-slate-900/60 p-2.5 rounded-xl border border-slate-700/50">
+          <label class="text-[11px] font-bold uppercase tracking-wider text-slate-300">Points to Win Round</label>
+          <div class="flex items-center gap-2">
+            <button id="btn-points-minus" type="button" class="w-12 h-12 bg-slate-800 hover:bg-slate-700 active:scale-95 text-xl font-bold rounded-xl border border-slate-600 flex items-center justify-center text-slate-200 transition">
+              <i class="fa-solid fa-minus"></i>
+            </button>
+            <input id="max-points-input" type="number" value="4" min="1" max="99" class="w-16 h-12 bg-slate-950 text-center font-black text-2xl text-yellow-400 rounded-xl border border-slate-700 focus:outline-none focus:border-cyan-400">
+            <button id="btn-points-plus" type="button" class="w-12 h-12 bg-slate-800 hover:bg-slate-700 active:scale-95 text-xl font-bold rounded-xl border border-slate-600 flex items-center justify-center text-slate-200 transition">
+              <i class="fa-solid fa-plus"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Rounds Stepper -->
+        <div class="flex flex-col items-center gap-1 bg-slate-900/60 p-2.5 rounded-xl border border-slate-700/50">
+          <label class="text-[11px] font-bold uppercase tracking-wider text-slate-300">Match Rounds</label>
+          <div class="flex items-center gap-2">
+            <button id="btn-rounds-minus" type="button" class="w-12 h-12 bg-slate-800 hover:bg-slate-700 active:scale-95 text-xl font-bold rounded-xl border border-slate-600 flex items-center justify-center text-slate-200 transition">
+              <i class="fa-solid fa-minus"></i>
+            </button>
+            <input id="total-rounds-input" type="number" value="3" min="1" max="9" step="2" class="w-16 h-12 bg-slate-950 text-center font-black text-2xl text-yellow-400 rounded-xl border border-slate-700 focus:outline-none focus:border-cyan-400">
+            <button id="btn-rounds-plus" type="button" class="w-12 h-12 bg-slate-800 hover:bg-slate-700 active:scale-95 text-xl font-bold rounded-xl border border-slate-600 flex items-center justify-center text-slate-200 transition">
+              <i class="fa-solid fa-plus"></i>
+            </button>
+          </div>
         </div>
       </div>
 
       <!-- Blader Names Setup -->
-      <div class="grid grid-cols-2 gap-4">
+      <div class="grid grid-cols-2 gap-3">
         <div>
           <label class="block text-xs font-bold text-[#03c6fc] uppercase tracking-wider mb-1">Blader 1</label>
-          <input id="blader1-input" type="text" value="Blader 1" class="w-full h-12 bg-slate-950 px-3 font-bold text-slate-100 rounded-lg border border-[#03c6fc]/40 focus:outline-none focus:border-[#03c6fc]">
+          <input id="blader1-input" type="text" value="Blader 1" class="w-full h-11 bg-slate-950 px-3 font-bold text-slate-100 rounded-lg border border-[#03c6fc]/40 focus:outline-none focus:border-[#03c6fc]">
         </div>
         <div>
           <label class="block text-xs font-bold text-[#42ff94] uppercase tracking-wider mb-1">Blader 2</label>
-          <input id="blader2-input" type="text" value="Blader 2" class="w-full h-12 bg-slate-950 px-3 font-bold text-slate-100 rounded-lg border border-[#42ff94]/40 focus:outline-none focus:border-[#42ff94]">
+          <input id="blader2-input" type="text" value="Blader 2" class="w-full h-11 bg-slate-950 px-3 font-bold text-slate-100 rounded-lg border border-[#42ff94]/40 focus:outline-none focus:border-[#42ff94]">
         </div>
       </div>
 
       <!-- Start Button -->
-      <button id="start-btn" type="button" class="w-full py-3.5 bg-gradient-to-r from-[#03c6fc] to-[#42ff94] text-slate-950 font-black text-lg tracking-wider rounded-xl shadow-lg active:scale-98 transition transform">
+      <button id="start-btn" type="button" class="w-full py-3 bg-gradient-to-r from-[#03c6fc] to-[#42ff94] text-slate-950 font-black text-lg tracking-wider rounded-xl shadow-lg active:scale-98 transition transform">
         START BATTLE
       </button>
     </div>
@@ -116,99 +125,107 @@
   <div id="counter-screen" class="hidden w-full h-full flex safe-padding relative">
     
     <!-- Left Side: Blader 1 (#03c6fc) -->
-    <div class="w-1/2 h-full bg-[#03c6fc] text-slate-950 flex flex-col justify-between p-4 relative border-r-2 border-slate-900/30">
+    <div class="w-1/2 h-full bg-[#03c6fc] text-slate-950 flex flex-col justify-between py-3 pl-6 pr-8 relative border-r-2 border-slate-900/30">
       
       <!-- Top Actions (Blader 1) -->
       <div class="flex items-center gap-2 z-10">
-        <button id="b1-add1" class="px-4 py-2 bg-slate-950/20 hover:bg-slate-950/30 active:scale-95 text-slate-950 border border-slate-950/20 rounded-xl font-black text-lg shadow-md transition">
+        <button id="b1-add1" class="px-4 py-2 bg-slate-950/20 hover:bg-slate-950/30 active:scale-95 text-slate-950 border border-slate-950/20 rounded-xl font-black text-base shadow-md transition">
           +1
         </button>
-        <button id="b1-add2" class="px-4 py-2 bg-slate-950/20 hover:bg-slate-950/30 active:scale-95 text-slate-950 border border-slate-950/20 rounded-xl font-black text-lg shadow-md transition">
+        <button id="b1-add2" class="px-4 py-2 bg-slate-950/20 hover:bg-slate-950/30 active:scale-95 text-slate-950 border border-slate-950/20 rounded-xl font-black text-base shadow-md transition">
           +2
         </button>
-        <button id="b1-add3" class="px-4 py-2 bg-slate-950/20 hover:bg-slate-950/30 active:scale-95 text-slate-950 border border-slate-950/20 rounded-xl font-black text-lg shadow-md transition">
+        <button id="b1-add3" class="px-4 py-2 bg-slate-950/20 hover:bg-slate-950/30 active:scale-95 text-slate-950 border border-slate-950/20 rounded-xl font-black text-base shadow-md transition">
           +3
         </button>
-        <button id="b1-undo" class="ml-auto px-4 py-2 bg-slate-950/20 hover:bg-slate-950/30 active:scale-95 text-slate-950 border border-slate-950/20 rounded-xl font-black text-lg shadow-md transition" title="Undo Side 1">
+        <button id="b1-undo" class="ml-auto px-4 py-2 bg-slate-950/20 hover:bg-slate-950/30 active:scale-95 text-slate-950 border border-slate-950/20 rounded-xl font-black text-base shadow-md transition" title="Undo Side 1">
           <i class="fa-solid fa-rotate-left"></i>
         </button>
       </div>
 
       <!-- Score & Name Display (Blader 1) -->
       <div class="flex flex-col items-center justify-center my-auto">
-        <h2 id="b1-display-name" class="text-2xl font-black tracking-wide uppercase truncate max-w-[90%] text-slate-950/80 mb-2">
+        <h2 id="b1-display-name" class="text-xl font-black tracking-wide uppercase truncate max-w-[90%] text-slate-950/80 mb-1">
           BLADER 1
         </h2>
-        <span id="b1-score" class="text-8xl font-black tracking-tight drop-shadow-md">
+        <span id="b1-score" class="text-7xl font-black tracking-tight drop-shadow-md">
           0
         </span>
+        <!-- Round Wins Indicator Badges -->
+        <div id="b1-round-indicators" class="flex gap-1.5 mt-2">
+          <!-- Dynamically populated round chips -->
+        </div>
       </div>
 
-      <div class="text-xs font-bold text-slate-950/60 uppercase tracking-widest text-center">FIRST TO <span class="max-target-display">4</span></div>
+      <div class="text-[11px] font-bold text-slate-950/60 uppercase tracking-widest text-center">FIRST TO <span class="max-target-display">4</span> PTS</div>
     </div>
 
     <!-- Center Divider & Refresh Control -->
     <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center gap-3 pointer-events-none">
-      <div class="w-12 h-12 bg-slate-950 rounded-full border-4 border-slate-800 flex items-center justify-center font-black text-white text-xs shadow-xl tracking-wider">
+      <div class="w-11 h-11 bg-slate-950 rounded-full border-4 border-slate-800 flex items-center justify-center font-black text-white text-xs shadow-xl tracking-wider">
         VS
       </div>
-      <button id="mid-refresh-btn" class="pointer-events-auto w-11 h-11 bg-slate-900/90 hover:bg-slate-950 text-white active:rotate-180 rounded-full border-2 border-slate-700 flex items-center justify-center shadow-lg transition duration-300">
-        <i class="fa-solid fa-rotate-right text-base"></i>
+      <button id="mid-refresh-btn" class="pointer-events-auto w-10 h-10 bg-slate-900/90 hover:bg-slate-950 text-white active:rotate-180 rounded-full border-2 border-slate-700 flex items-center justify-center shadow-lg transition duration-300" title="Reset Current Round">
+        <i class="fa-solid fa-rotate-right text-sm"></i>
       </button>
     </div>
 
     <!-- Right Side: Blader 2 (#42ff94) -->
-    <div class="w-1/2 h-full bg-[#42ff94] text-slate-950 flex flex-col justify-between p-4 relative border-l-2 border-slate-900/30">
+    <div class="w-1/2 h-full bg-[#42ff94] text-slate-950 flex flex-col justify-between py-3 pr-6 pl-8 relative border-l-2 border-slate-900/30">
       
       <!-- Top Actions (Blader 2) -->
       <div class="flex items-center gap-2 z-10 flex-row-reverse">
-        <button id="b2-add1" class="px-4 py-2 bg-slate-950/20 hover:bg-slate-950/30 active:scale-95 text-slate-950 border border-slate-950/20 rounded-xl font-black text-lg shadow-md transition">
+        <button id="b2-add1" class="px-4 py-2 bg-slate-950/20 hover:bg-slate-950/30 active:scale-95 text-slate-950 border border-slate-950/20 rounded-xl font-black text-base shadow-md transition">
           +1
         </button>
-        <button id="b2-add2" class="px-4 py-2 bg-slate-950/20 hover:bg-slate-950/30 active:scale-95 text-slate-950 border border-slate-950/20 rounded-xl font-black text-lg shadow-md transition">
+        <button id="b2-add2" class="px-4 py-2 bg-slate-950/20 hover:bg-slate-950/30 active:scale-95 text-slate-950 border border-slate-950/20 rounded-xl font-black text-base shadow-md transition">
           +2
         </button>
-        <button id="b2-add3" class="px-4 py-2 bg-slate-950/20 hover:bg-slate-950/30 active:scale-95 text-slate-950 border border-slate-950/20 rounded-xl font-black text-lg shadow-md transition">
+        <button id="b2-add3" class="px-4 py-2 bg-slate-950/20 hover:bg-slate-950/30 active:scale-95 text-slate-950 border border-slate-950/20 rounded-xl font-black text-base shadow-md transition">
           +3
         </button>
-        <button id="b2-undo" class="mr-auto px-4 py-2 bg-slate-950/20 hover:bg-slate-950/30 active:scale-95 text-slate-950 border border-slate-950/20 rounded-xl font-black text-lg shadow-md transition" title="Undo Side 2">
+        <button id="b2-undo" class="mr-auto px-4 py-2 bg-slate-950/20 hover:bg-slate-950/30 active:scale-95 text-slate-950 border border-slate-950/20 rounded-xl font-black text-base shadow-md transition" title="Undo Side 2">
           <i class="fa-solid fa-rotate-left"></i>
         </button>
       </div>
 
       <!-- Score & Name Display (Blader 2) -->
       <div class="flex flex-col items-center justify-center my-auto">
-        <h2 id="b2-display-name" class="text-2xl font-black tracking-wide uppercase truncate max-w-[90%] text-slate-950/80 mb-2">
+        <h2 id="b2-display-name" class="text-xl font-black tracking-wide uppercase truncate max-w-[90%] text-slate-950/80 mb-1">
           BLADER 2
         </h2>
-        <span id="b2-score" class="text-8xl font-black tracking-tight drop-shadow-md">
+        <span id="b2-score" class="text-7xl font-black tracking-tight drop-shadow-md">
           0
         </span>
+        <!-- Round Wins Indicator Badges -->
+        <div id="b2-round-indicators" class="flex gap-1.5 mt-2">
+          <!-- Dynamically populated round chips -->
+        </div>
       </div>
 
-      <div class="text-xs font-bold text-slate-950/60 uppercase tracking-widest text-center">FIRST TO <span class="max-target-display">4</span></div>
+      <div class="text-[11px] font-bold text-slate-950/60 uppercase tracking-widest text-center">FIRST TO <span class="max-target-display">4</span> PTS</div>
     </div>
   </div>
 
   <!-- 3. VICTORY CONGRATULATIONS SCREEN -->
   <div id="victory-screen" class="hidden w-full h-full flex flex-col items-center justify-center safe-padding relative text-center">
-    <div class="z-10 max-w-lg w-full bg-slate-950/60 backdrop-blur-md p-8 rounded-3xl border border-white/20 shadow-2xl flex flex-col items-center gap-4">
-      <div class="w-20 h-20 bg-yellow-400 text-slate-950 rounded-full flex items-center justify-center text-4xl shadow-lg mb-2">
+    <div class="z-10 max-w-md w-full bg-slate-950/60 backdrop-blur-md p-6 rounded-3xl border border-white/20 shadow-2xl flex flex-col items-center gap-3">
+      <div class="w-16 h-16 bg-yellow-400 text-slate-950 rounded-full flex items-center justify-center text-3xl shadow-lg mb-1">
         <i class="fa-solid fa-trophy"></i>
       </div>
-      <h2 class="text-sm font-bold uppercase tracking-widest text-slate-900/80">VICTORY UNLOCKED</h2>
-      <h1 id="winner-name-display" class="text-4xl font-black text-slate-950 tracking-wide uppercase drop-shadow-sm">
+      <h2 id="victory-badge-title" class="text-xs font-bold uppercase tracking-widest text-slate-900/80">MATCH VICTORY</h2>
+      <h1 id="winner-name-display" class="text-3xl font-black text-slate-950 tracking-wide uppercase drop-shadow-sm">
         BLADER 1 WINS!
       </h1>
-      <p id="winner-score-summary" class="text-lg font-bold text-slate-950/90">
-        Final Score: 4 - 2
+      <p id="winner-score-summary" class="text-base font-bold text-slate-950/90">
+        Rounds Won: 2 - 0
       </p>
 
-      <div class="flex gap-4 w-full mt-4">
-        <button id="rematch-btn" class="flex-1 py-3.5 bg-slate-950 hover:bg-slate-900 text-white font-bold rounded-xl shadow-lg active:scale-95 transition">
+      <div class="flex gap-3 w-full mt-3">
+        <button id="rematch-btn" class="flex-1 py-3 bg-slate-950 hover:bg-slate-900 text-white font-bold rounded-xl shadow-lg active:scale-95 transition">
           REMATCH
         </button>
-        <button id="new-setup-btn" class="flex-1 py-3.5 bg-white/30 hover:bg-white/40 text-slate-950 border border-slate-950/30 font-bold rounded-xl shadow-md active:scale-95 transition">
+        <button id="new-setup-btn" class="flex-1 py-3 bg-white/30 hover:bg-white/40 text-slate-950 border border-slate-950/30 font-bold rounded-xl shadow-md active:scale-95 transition">
           SETUP
         </button>
       </div>
@@ -236,14 +253,17 @@
 
       // App state
       let maxPoints = 4;
+      let totalRounds = 3;
+      let roundsNeeded = 2;
       let score1 = 0;
       let score2 = 0;
+      let roundsWon1 = 0;
+      let roundsWon2 = 0;
       let history1 = [];
       let history2 = [];
       let name1 = "Blader 1";
       let name2 = "Blader 2";
       let confettiActive = false;
-      let confettiAnimationId = null;
 
       // DOM Elements
       const setupScreen = document.getElementById('setup-screen');
@@ -251,8 +271,7 @@
       const victoryScreen = document.getElementById('victory-screen');
 
       const maxPointsInput = document.getElementById('max-points-input');
-      const btnMinus = document.getElementById('btn-minus');
-      const btnPlus = document.getElementById('btn-plus');
+      const totalRoundsInput = document.getElementById('total-rounds-input');
       const blader1Input = document.getElementById('blader1-input');
       const blader2Input = document.getElementById('blader2-input');
       const startBtn = document.getElementById('start-btn');
@@ -261,28 +280,42 @@
       const b2DisplayName = document.getElementById('b2-display-name');
       const b1ScoreEl = document.getElementById('b1-score');
       const b2ScoreEl = document.getElementById('b2-score');
+      const b1RoundIndicators = document.getElementById('b1-round-indicators');
+      const b2RoundIndicators = document.getElementById('b2-round-indicators');
       const maxTargetDisplays = document.querySelectorAll('.max-target-display');
       const midRefreshBtn = document.getElementById('mid-refresh-btn');
 
       const winnerNameDisplay = document.getElementById('winner-name-display');
       const winnerScoreSummary = document.getElementById('winner-score-summary');
+      const victoryBadgeTitle = document.getElementById('victory-badge-title');
       const rematchBtn = document.getElementById('rematch-btn');
       const newSetupBtn = document.getElementById('new-setup-btn');
 
       // Setup Stepper Listeners
-      btnMinus.addEventListener('click', () => {
+      document.getElementById('btn-points-minus').addEventListener('click', () => {
         let val = parseInt(maxPointsInput.value) || 1;
         if (val > 1) maxPointsInput.value = val - 1;
       });
-
-      btnPlus.addEventListener('click', () => {
+      document.getElementById('btn-points-plus').addEventListener('click', () => {
         let val = parseInt(maxPointsInput.value) || 1;
         if (val < 99) maxPointsInput.value = val + 1;
+      });
+
+      document.getElementById('btn-rounds-minus').addEventListener('click', () => {
+        let val = parseInt(totalRoundsInput.value) || 1;
+        if (val > 1) totalRoundsInput.value = val - 2;
+      });
+      document.getElementById('btn-rounds-plus').addEventListener('click', () => {
+        let val = parseInt(totalRoundsInput.value) || 1;
+        if (val < 9) totalRoundsInput.value = val + 2;
       });
 
       // Start Game Event
       startBtn.addEventListener('click', () => {
         maxPoints = parseInt(maxPointsInput.value) || 4;
+        totalRounds = parseInt(totalRoundsInput.value) || 3;
+        roundsNeeded = Math.ceil(totalRounds / 2);
+
         name1 = blader1Input.value.trim() || "Blader 1";
         name2 = blader2Input.value.trim() || "Blader 2";
 
@@ -290,7 +323,10 @@
         b2DisplayName.textContent = name2;
         maxTargetDisplays.forEach(el => el.textContent = maxPoints);
 
+        roundsWon1 = 0;
+        roundsWon2 = 0;
         resetScores();
+        updateRoundIndicators();
 
         setupScreen.classList.add('hidden');
         counterScreen.classList.remove('hidden');
@@ -323,7 +359,7 @@
           playTone(520 + pts * 100, 'sine', 0.15);
         }
 
-        checkVictory();
+        checkRoundVictory();
       }
 
       function undoSide(blader) {
@@ -349,31 +385,71 @@
         b2ScoreEl.textContent = 0;
       }
 
-      function checkVictory() {
-        if (score1 >= maxPoints || score2 >= maxPoints) {
-          const isB1 = score1 >= maxPoints;
-          const winnerName = isB1 ? name1 : name2;
-          const winnerBgColor = isB1 ? 'bg-[#03c6fc]' : 'bg-[#42ff94]';
-
-          winnerNameDisplay.textContent = `${winnerName} WINS!`;
-          winnerScoreSummary.textContent = `Final Score: ${score1} - ${score2}`;
-
-          victoryScreen.className = `w-full h-full flex flex-col items-center justify-center safe-padding relative text-center ${winnerBgColor} transition-colors duration-500`;
-
-          counterScreen.classList.add('hidden');
-          victoryScreen.classList.remove('hidden');
-
-          playTone(587.33, 'triangle', 0.2);
-          setTimeout(() => playTone(880, 'sine', 0.4), 200);
-
-          triggerConfetti();
+      function updateRoundIndicators() {
+        // Build round indicators for Blader 1
+        let html1 = '';
+        for (let i = 1; i <= roundsNeeded; i++) {
+          const won = i <= roundsWon1;
+          html1 += `<div class="w-6 h-6 rounded-full border-2 border-slate-950/40 flex items-center justify-center text-[10px] font-black ${won ? 'bg-slate-950 text-[#03c6fc]' : 'bg-slate-950/10 text-slate-950/40'}">${i}</div>`;
         }
+        b1RoundIndicators.innerHTML = html1;
+
+        // Build round indicators for Blader 2
+        let html2 = '';
+        for (let i = 1; i <= roundsNeeded; i++) {
+          const won = i <= roundsWon2;
+          html2 += `<div class="w-6 h-6 rounded-full border-2 border-slate-950/40 flex items-center justify-center text-[10px] font-black ${won ? 'bg-slate-950 text-[#42ff94]' : 'bg-slate-950/10 text-slate-950/40'}">${i}</div>`;
+        }
+        b2RoundIndicators.innerHTML = html2;
+      }
+
+      function checkRoundVictory() {
+        if (score1 >= maxPoints || score2 >= maxPoints) {
+          const roundWinner = score1 >= maxPoints ? 1 : 2;
+          
+          if (roundWinner === 1) roundsWon1++;
+          else roundsWon2++;
+
+          updateRoundIndicators();
+
+          // Check if match is won
+          if (roundsWon1 >= roundsNeeded || roundsWon2 >= roundsNeeded) {
+            triggerMatchVictory(roundsWon1 >= roundsNeeded ? 1 : 2);
+          } else {
+            // Reset for next round with a brief audio cue
+            playTone(600, 'sine', 0.2);
+            resetScores();
+          }
+        }
+      }
+
+      function triggerMatchVictory(winnerBlader) {
+        const isB1 = winnerBlader === 1;
+        const winnerName = isB1 ? name1 : name2;
+        const winnerBgColor = isB1 ? 'bg-[#03c6fc]' : 'bg-[#42ff94]';
+
+        victoryBadgeTitle.textContent = `BEST OF ${totalRounds} MATCH VICTORY`;
+        winnerNameDisplay.textContent = `${winnerName} WINS!`;
+        winnerScoreSummary.textContent = `Rounds Won: ${roundsWon1} - ${roundsWon2}`;
+
+        victoryScreen.className = `w-full h-full flex flex-col items-center justify-center safe-padding relative text-center ${winnerBgColor} transition-colors duration-500`;
+
+        counterScreen.classList.add('hidden');
+        victoryScreen.classList.remove('hidden');
+
+        playTone(587.33, 'triangle', 0.2);
+        setTimeout(() => playTone(880, 'sine', 0.4), 200);
+
+        triggerConfetti();
       }
 
       // Rematch & Setup Buttons
       rematchBtn.addEventListener('click', () => {
         stopAndClearConfetti();
+        roundsWon1 = 0;
+        roundsWon2 = 0;
         resetScores();
+        updateRoundIndicators();
         victoryScreen.classList.add('hidden');
         counterScreen.classList.remove('hidden');
       });
