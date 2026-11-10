@@ -23,7 +23,7 @@
     /* Forced Landscape Logic for Portrait Orientation */
     @media screen and (orientation: portrait) {
       body {
-        transform: rotate(-90deg);
+        transform: rotate(90deg);
         transform-origin: left top;
         width: 100vh;
         height: 100vw;
@@ -94,7 +94,7 @@
             <button id="btn-rounds-minus" type="button" class="w-12 h-12 bg-slate-800 hover:bg-slate-700 active:scale-95 text-xl font-bold rounded-xl border border-slate-600 flex items-center justify-center text-slate-200 transition">
               <i class="fa-solid fa-minus"></i>
             </button>
-            <input id="total-rounds-input" type="number" value="3" min="1" max="9" step="2" class="w-16 h-12 bg-slate-950 text-center font-black text-2xl text-yellow-400 rounded-xl border border-slate-700 focus:outline-none focus:border-cyan-400">
+            <input id="total-rounds-input" type="number" value="1" min="1" max="9" step="2" class="w-16 h-12 bg-slate-950 text-center font-black text-2xl text-yellow-400 rounded-xl border border-slate-700 focus:outline-none focus:border-cyan-400">
             <button id="btn-rounds-plus" type="button" class="w-12 h-12 bg-slate-800 hover:bg-slate-700 active:scale-95 text-xl font-bold rounded-xl border border-slate-600 flex items-center justify-center text-slate-200 transition">
               <i class="fa-solid fa-plus"></i>
             </button>
