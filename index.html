@@ -160,20 +160,23 @@
       <div class="text-[11px] font-bold text-slate-950/60 uppercase tracking-widest text-center">FIRST TO <span class="max-target-display">4</span> PTS</div>
     </div>
 
-    <!-- Center Divider, Settings Icon & Refresh Control -->
-    <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center gap-2 pointer-events-none">
-      <!-- Return to Settings / Setup Button -->
-      <button id="exit-to-setup-btn" class="pointer-events-auto w-9 h-9 bg-slate-900/90 hover:bg-slate-950 text-white active:scale-90 rounded-full border-2 border-slate-700 flex items-center justify-center shadow-lg transition" title="Return to Settings">
-        <i class="fa-solid fa-[#fa4d56] fa-gear text-xs"></i>
-      </button>
-
+    <!-- Center Divider & Refresh Control -->
+    <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center gap-3 pointer-events-none">
       <div class="w-11 h-11 bg-slate-950 rounded-full border-4 border-slate-800 flex items-center justify-center font-black text-white text-xs shadow-xl tracking-wider">
         VS
       </div>
 
       <!-- Mid Round Refresh Button -->
-      <button id="mid-refresh-btn" class="pointer-events-auto w-9 h-9 bg-slate-900/90 hover:bg-slate-950 text-white active:rotate-180 rounded-full border-2 border-slate-700 flex items-center justify-center shadow-lg transition duration-300" title="Reset Current Round">
-        <i class="fa-solid fa-rotate-right text-xs"></i>
+      <button id="mid-refresh-btn" class="pointer-events-auto w-10 h-10 bg-slate-900/90 hover:bg-slate-950 text-white active:rotate-180 rounded-full border-2 border-slate-700 flex items-center justify-center shadow-lg transition duration-300" title="Reset Current Round">
+        <i class="fa-solid fa-rotate-right text-sm"></i>
+      </button>
+    </div>
+
+    <!-- Bottom Center: Exit to Setup Button -->
+    <div class="absolute bottom-3 left-1/2 -translate-x-1/2 z-20">
+      <button id="bottom-setup-btn" class="px-3.5 py-1.5 bg-slate-950/80 hover:bg-slate-950 text-white active:scale-95 rounded-full border border-slate-700/80 text-xs font-bold flex items-center gap-2 shadow-lg transition backdrop-blur-sm">
+        <i class="fa-solid fa-gear text-slate-400"></i>
+        <span>SETTINGS</span>
       </button>
     </div>
 
@@ -292,7 +295,7 @@
       const b2RoundIndicators = document.getElementById('b2-round-indicators');
       const maxTargetDisplays = document.querySelectorAll('.max-target-display');
       const midRefreshBtn = document.getElementById('mid-refresh-btn');
-      const exitToSetupBtn = document.getElementById('exit-to-setup-btn');
+      const bottomSetupBtn = document.getElementById('bottom-setup-btn');
 
       const winnerNameDisplay = document.getElementById('winner-name-display');
       const winnerScoreSummary = document.getElementById('winner-score-summary');
@@ -356,7 +359,7 @@
       document.getElementById('b2-undo').addEventListener('click', () => undoSide(2));
 
       midRefreshBtn.addEventListener('click', resetScores);
-      exitToSetupBtn.addEventListener('click', goToSetup);
+      bottomSetupBtn.addEventListener('click', goToSetup);
 
       function addPoints(blader, pts) {
         if (blader === 1) {
