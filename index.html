@@ -87,14 +87,14 @@
           </div>
         </div>
 
-        <!-- Rounds Stepper -->
+        <!-- Rounds Stepper (Starts from 1) -->
         <div class="flex flex-col items-center gap-1 bg-slate-900/60 p-2.5 rounded-xl border border-slate-700/50">
           <label class="text-[11px] font-bold uppercase tracking-wider text-slate-300">Match Rounds</label>
           <div class="flex items-center gap-2">
             <button id="btn-rounds-minus" type="button" class="w-12 h-12 bg-slate-800 hover:bg-slate-700 active:scale-95 text-xl font-bold rounded-xl border border-slate-600 flex items-center justify-center text-slate-200 transition">
               <i class="fa-solid fa-minus"></i>
             </button>
-            <input id="total-rounds-input" type="number" value="1" min="1" max="9" step="2" class="w-16 h-12 bg-slate-950 text-center font-black text-2xl text-yellow-400 rounded-xl border border-slate-700 focus:outline-none focus:border-cyan-400">
+            <input id="total-rounds-input" type="number" value="1" min="1" max="99" class="w-16 h-12 bg-slate-950 text-center font-black text-2xl text-yellow-400 rounded-xl border border-slate-700 focus:outline-none focus:border-cyan-400">
             <button id="btn-rounds-plus" type="button" class="w-12 h-12 bg-slate-800 hover:bg-slate-700 active:scale-95 text-xl font-bold rounded-xl border border-slate-600 flex items-center justify-center text-slate-200 transition">
               <i class="fa-solid fa-plus"></i>
             </button>
@@ -263,8 +263,8 @@
 
       // App state
       let maxPoints = 4;
-      let totalRounds = 3;
-      let roundsNeeded = 2;
+      let totalRounds = 1;
+      let roundsNeeded = 1;
       let score1 = 0;
       let score2 = 0;
       let roundsWon1 = 0;
@@ -316,17 +316,17 @@
 
       document.getElementById('btn-rounds-minus').addEventListener('click', () => {
         let val = parseInt(totalRoundsInput.value) || 1;
-        if (val > 1) totalRoundsInput.value = val - 2;
+        if (val > 1) totalRoundsInput.value = val - 1;
       });
       document.getElementById('btn-rounds-plus').addEventListener('click', () => {
         let val = parseInt(totalRoundsInput.value) || 1;
-        if (val < 9) totalRoundsInput.value = val + 2;
+        if (val < 99) totalRoundsInput.value = val + 1;
       });
 
       // Start Game Event
       startBtn.addEventListener('click', () => {
         maxPoints = parseInt(maxPointsInput.value) || 4;
-        totalRounds = parseInt(totalRoundsInput.value) || 3;
+        totalRounds = parseInt(totalRoundsInput.value) || 1;
         roundsNeeded = Math.ceil(totalRounds / 2);
 
         name1 = blader1Input.value.trim() || "Blader 1";
@@ -425,7 +425,6 @@
 
           updateRoundIndicators();
 
-          // Check if total match is won or just a single round
           if (roundsWon1 >= roundsNeeded || roundsWon2 >= roundsNeeded) {
             isMatchOver = true;
             showVictoryScreen(roundWinner, true);
