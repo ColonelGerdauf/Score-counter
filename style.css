@@ -7,19 +7,19 @@
 	--right-txt: 0,95,15;
 }
 #counter-screen {
-	*.border-r-2 {
+	& .border-r-2 {
 		background-color: rgb(var(--left-bg));
-		* {
+		& * {
 			border-color: rgba(var(--left-txt),var(--border-transparency));
 			color:rgb(var(--left-txt));
 	}}
-	*.border-l-2 {
+	& .border-l-2 {
 		background-color: rgb(var(--right-bg));
-		* {
+		& * {
 			border-color: rgba(var(--right-txt),var(--border-transparency));
 			color:rgb(var(--right-txt));
 	}}
-	*> .text-center {
+	& .text-center {
 			margin-left:auto;
 			margin-right:auto;
 			border-style: solid;
